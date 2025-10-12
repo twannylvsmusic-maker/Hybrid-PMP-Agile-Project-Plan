@@ -1,0 +1,24 @@
+{
+  "EXCEL_PATH": "../Hybrid_ProjectPlan_Template.xlsx",
+  "WEEKLY_SHEET": "Weekly_Updates",
+  "CSV_FOLDER": "./weekly_csvs",
+  "START_ROW": 4,
+  "BACKUP_ON_SAVE": true,
+  "LOG_LEVEL": "INFO",
+  "LOG_FILE": "weekly_update.log",
+  "EMAIL_NOTIFICATIONS": {
+    "ENABLED": false,
+    "SMTP_SERVER": "smtp.gmail.com",
+    "SMTP_PORT": 587,
+    "EMAIL": "",
+    "PASSWORD": "",
+    "TO_EMAILS": []
+  },
+  "DATA_VALIDATION": {
+    "MIN_CSAT": 0,
+    "MAX_CSAT": 10,
+    "MIN_NPS": -100,
+    "MAX_NPS": 100,
+    "MAX_TICKETS": 10000
+  }
+}

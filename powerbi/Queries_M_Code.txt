@@ -1,0 +1,62 @@
+// =========================
+// Power BI Power Query (M)
+// =========================
+
+// 1) Weekly Updates from a Folder
+let
+    Source = Folder.Files("REPLACE_WITH_FULL_PATH/Hybrid_ProjectPlan_Package/automation/weekly_csvs"),
+    #"Filtered CSVs" = Table.SelectRows(Source, each Text.EndsWith([Extension], ".csv")),
+    #"Combine" = Table.Combine(
+        List.Transform(#"Filtered CSVs"[Content], each Csv.Document(_, [Delimiter=",", Columns=6, Encoding=65001, QuoteStyle=QuoteStyle.Csv]))
+    ),
+    #"Promoted Headers" = Table.PromoteHeaders(#"Combine", [PromoteAllScalars=true]),
+    #"Changed Types" = Table.TransformColumnTypes(#"Promoted Headers",{
+        {"Week Start", type date},
+        {"Tickets Opened", Int64.Type},
+        {"Tickets Resolved", Int64.Type},
+        {"NPS", type number},
+        {"CSAT", type number},
+        {"Notes", type text}
+    }),
+    #"Removed Duplicates" = Table.Distinct(#"Changed Types", {"Week Start"}),
+    #"Sorted Rows" = Table.Sort(#"Removed Duplicates",{{"Week Start", Order.Ascending}})
+in
+    #"Sorted Rows"
+
+// 2) WBS_TaskPlan from Excel
+let
+    Source = Excel.Workbook(File.Contents("REPLACE_WITH_FULL_PATH/Hybrid_ProjectPlan_Package/Hybrid_ProjectPlan_Template.xlsx"), null, true),
+    Sheet = Source{[Item="WBS_TaskPlan",Kind="Sheet"]}[Data],
+    #"Promoted Headers" = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+    #"Changed Types" = Table.TransformColumnTypes(#"Promoted Headers",{
+        {"WBS ID", type text}, {"Task Name", type text}, {"Owner", type text},
+        {"Planned Start", type date}, {"Planned End", type date}, {"Planned Days", Int64.Type},
+        {"Actual Start", type date}, {"Actual End", type date}, {"Actual Days", Int64.Type},
+        {"% Complete", type number}, {"Status (RAG)", type text}, {"Dependencies", type text}
+    })
+in
+    #"Changed Types"
+
+// 3) Risk_Issue_Log from Excel
+let
+    Source = Excel.Workbook(File.Contents("REPLACE_WITH_FULL_PATH/Hybrid_ProjectPlan_Package/Hybrid_ProjectPlan_Template.xlsx"), null, true),
+    Sheet = Source{[Item="Risk_Issue_Log",Kind="Sheet"]}[Data],
+    #"Promoted Headers" = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+    #"Changed Types" = Table.TransformColumnTypes(#"Promoted Headers",{
+        {"ID", type text}, {"Type (Risk/Issue)", type text}, {"Description", type text},
+        {"Probability (0-1)", type number}, {"Impact (1-5)", Int64.Type},
+        {"Score (P*I)", type number}, {"Owner", type text},
+        {"Mitigation/Action", type text}, {"Status", type text}
+    }),
+    #"Filtered Rows" = Table.SelectRows(#"Changed Types", each [ID] <> null and [ID] <> "ID")
+in
+    #"Filtered Rows"
+
+// 4) Project_Overview for TTV
+let
+    Source = Excel.Workbook(File.Contents("REPLACE_WITH_FULL_PATH/Hybrid_ProjectPlan_Package/Hybrid_ProjectPlan_Template.xlsx"), null, true),
+    Sheet = Source{[Item="Project_Overview",Kind="Sheet"]}[Data],
+    #"Promoted Headers" = Table.PromoteHeaders(Sheet, [PromoteAllScalars=true]),
+    #"Kept Rows" = Table.SelectRows(#"Promoted Headers", each [Project Name] <> null)
+in
+    #"Kept Rows"

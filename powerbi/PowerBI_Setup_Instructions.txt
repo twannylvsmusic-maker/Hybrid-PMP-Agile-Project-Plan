@@ -1,0 +1,26 @@
+Power BI Setup — Hybrid Project Plan
+
+What you'll do:
+1) In Power BI Desktop, Get Data → **Folder** → point to:
+   REPLACE_WITH_FULL_PATH/Hybrid_ProjectPlan_Package/automation/weekly_csvs
+   - Paste the M code for 'Weekly Updates' from Queries_M_Code.txt if you want exact schema.
+2) Get Data → **Excel** → select:
+   REPLACE_WITH_FULL_PATH/Hybrid_ProjectPlan_Package/Hybrid_ProjectPlan_Template.xlsx
+   - Import sheets: WBS_TaskPlan, Risk_Issue_Log, Project_Overview (and Sprint_Planner if desired).
+3) Open **DAX_Measures.txt**, create a **Calendar** table and paste the measures in a new measures table.
+4) Create relationships:
+   - Weekly Updates[Week Start] → Calendar[Date]
+   - (Optional) other date fields to Calendar if added.
+5) Apply the theme: View → **Browse for themes** → select theme_github_portfolio.json
+6) Build visuals:
+   - Line chart: Date vs CSAT (Avg CSAT); add a slicer for last 4 weeks.
+   - Clustered columns: Tickets Opened vs Resolved by Week.
+   - Card visuals: TTV (days), High Risk Count, Backlog Points Total.
+   - Table: Risk_Issue_Log with conditional formatting when Score > 1.5.
+7) Refresh:
+   - Place weekly CSVs into `automation/weekly_csvs` (or use Python automation to update Excel too).
+   - Click **Refresh** in Power BI to update visuals.
+
+Notes:
+- Replace all REPLACE_WITH_FULL_PATH with your actual absolute path.
+- Save your PBIX into the project folder for convenience.

@@ -1,0 +1,122 @@
+// ========================================
+// ENHANCED POWER BI DAX MEASURES
+// ========================================
+
+// 1. CALENDAR TABLE (Enhanced)
+Calendar = 
+ADDCOLUMNS(
+    CALENDAR ( DATE(2024,1,1), DATE(2030,12,31) ),
+    "Year", YEAR([Date]),
+    "Quarter", "Q" & QUARTER([Date]),
+    "Month", FORMAT([Date], "YYYY-MM"),
+    "Month Name", FORMAT([Date], "MMMM"),
+    "Week Number", WEEKNUM([Date]),
+    "Weekday", FORMAT([Date], "dddd"),
+    "Is Weekend", IF(WEEKDAY([Date]) IN {1,7}, "Weekend", "Weekday"),
+    "Fiscal Year", IF(MONTH([Date]) >= 4, YEAR([Date]), YEAR([Date]) - 1),
+    "Days Since Start", DATEDIFF(DATE(2024,1,1), [Date], DAY)
+)
+
+// 2. BASIC METRICS
+Tickets Opened Total = SUM('Weekly Updates'[Tickets Opened])
+Tickets Resolved Total = SUM('Weekly Updates'[Tickets Resolved])
+Tickets Backlog = [Tickets Opened Total] - [Tickets Resolved Total]
+
+Avg CSAT = AVERAGE('Weekly Updates'[CSAT])
+Avg NPS = AVERAGE('Weekly Updates'[NPS])
+
+// 3. ENHANCED RISK MANAGEMENT
+Open Risks Count = COUNTROWS( FILTER('Risk_Issue_Log', 'Risk_Issue_Log'[Status] = "Open" ) )
+High Risk Count = COUNTROWS( FILTER('Risk_Issue_Log', 'Risk_Issue_Log'[Score (P*I)] > 1.5 ) )
+Critical Risk Count = COUNTROWS( FILTER('Risk_Issue_Log', 'Risk_Issue_Log'[Score (P*I)] > 2.5 ) )
+Risk Resolution Rate = DIVIDE(
+    COUNTROWS( FILTER('Risk_Issue_Log', 'Risk_Issue_Log'[Status] = "Closed" ) ),
+    COUNTROWS('Risk_Issue_Log'),
+    0
+)
+
+// 4. ADVANCED PROJECT METRICS
+TTV (days) = DATEDIFF('Project_Overview'[Start Date], 'Project_Overview'[Target Go-Live], DAY)
+Project Progress % = AVERAGE('WBS_TaskPlan'[% Complete])
+Overdue Tasks = COUNTROWS( FILTER('WBS_TaskPlan', 
+    'WBS_TaskPlan'[Actual End] > 'WBS_TaskPlan'[Planned End] && 
+    'WBS_TaskPlan'[Actual End] <> BLANK() ) )
+
+// 5. SPRINT & VELOCITY METRICS
+Backlog Points Total = SUM('Sprint_Planner'[Estimate (pts)])
+Completed Points = SUMX( FILTER('Sprint_Planner', 'Sprint_Planner'[Status] = "Done" ), 
+    'Sprint_Planner'[Estimate (pts)] )
+Sprint Velocity = AVERAGEX( VALUES('Sprint_Planner'[Sprint]), 
+    CALCULATE([Completed Points]) )
+
+// 6. TIME INTELLIGENCE MEASURES
+Tickets Opened (Last 4 Weeks) = CALCULATE([Tickets Opened Total], 
+    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -28, DAY))
+Tickets Opened (Last 12 Weeks) = CALCULATE([Tickets Opened Total], 
+    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -84, DAY))
+
+CSAT (Last 4 Weeks) = CALCULATE([Avg CSAT], 
+    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -28, DAY))
+CSAT (Last 12 Weeks) = CALCULATE([Avg CSAT], 
+    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -84, DAY))
+
+NPS (Last 4 Weeks) = CALCULATE([Avg NPS], 
+    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]), -28, DAY))
+
+// 7. TREND ANALYSIS
+CSAT Trend = 
+VAR CurrentPeriod = [CSAT (Last 4 Weeks)]
+VAR PreviousPeriod = CALCULATE([Avg CSAT], 
+    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]) - 28, -28, DAY))
+RETURN DIVIDE(CurrentPeriod - PreviousPeriod, PreviousPeriod, 0)
+
+Tickets Trend = 
+VAR CurrentPeriod = [Tickets Opened (Last 4 Weeks)]
+VAR PreviousPeriod = CALCULATE([Tickets Opened Total], 
+    DATESINPERIOD('Calendar'[Date], MAX('Calendar'[Date]) - 28, -28, DAY))
+RETURN DIVIDE(CurrentPeriod - PreviousPeriod, PreviousPeriod, 0)
+
+// 8. PERFORMANCE INDICATORS
+Resolution Efficiency = DIVIDE([Tickets Resolved Total], [Tickets Opened Total], 0)
+Backlog Growth Rate = DIVIDE([Tickets Backlog], [Tickets Opened Total], 0)
+
+// 9. QUALITY METRICS
+CSAT Target Achievement = IF([Avg CSAT] >= 8, "Above Target", 
+    IF([Avg CSAT] >= 6, "At Target", "Below Target"))
+NPS Category = IF([Avg NPS] >= 50, "Promoter", 
+    IF([Avg NPS] >= 0, "Passive", "Detractor"))
+
+// 10. ROLLING AVERAGES
+CSAT Rolling 4W = AVERAGEX(
+    TOPN(4, VALUES('Weekly Updates'[Week Start]), 'Weekly Updates'[Week Start], DESC),
+    [Avg CSAT]
+)
+
+Tickets Opened Rolling 4W = AVERAGEX(
+    TOPN(4, VALUES('Weekly Updates'[Week Start]), 'Weekly Updates'[Week Start], DESC),
+    [Tickets Opened Total]
+)
+
+// 11. CONDITIONAL FORMATTING SUPPORT
+CSAT Status = SWITCH(
+    TRUE(),
+    [Avg CSAT] >= 8, "Excellent",
+    [Avg CSAT] >= 6, "Good", 
+    [Avg CSAT] >= 4, "Fair",
+    "Poor"
+)
+
+Risk Level = SWITCH(
+    TRUE(),
+    [High Risk Count] = 0, "Low",
+    [High Risk Count] <= 2, "Medium",
+    [High Risk Count] <= 5, "High",
+    "Critical"
+)
+
+// 12. PROJECT HEALTH SCORE
+Project Health Score = 
+VAR CSATScore = SWITCH([CSAT Status], "Excellent", 4, "Good", 3, "Fair", 2, "Poor", 1)
+VAR RiskScore = SWITCH([Risk Level], "Low", 4, "Medium", 3, "High", 2, "Critical", 1)
+VAR ProgressScore = SWITCH(TRUE(), [Project Progress %] >= 90, 4, [Project Progress %] >= 70, 3, [Project Progress %] >= 50, 2, 1)
+RETURN (CSATScore + RiskScore + ProgressScore) / 3
