@@ -15,3 +15,18 @@
 2025-10-12 07:04:34,783 - INFO - Backup created: ../Hybrid_ProjectPlan_Template_backup_20251012_070434.xlsx
 2025-10-12 07:04:34,800 - INFO - Successfully wrote 8 rows into Weekly_Updates @ ../Hybrid_ProjectPlan_Template.xlsx
 2025-10-12 07:04:34,800 - INFO - Weekly update completed successfully!  • Processed 8 data rows • Written 8 rows to Excel • Duration: 0.15 seconds • Trends detected: {'CSAT': {'recent_avg': 8.48, 'overall_avg': 8.68, 'trend': 'declining'}, 'Resolution': {'recent_total': 38, 'trend': 'improving'}} 
+2025-10-12 07:11:59,140 - INFO - Starting weekly update process
+2025-10-12 07:11:59,140 - ERROR - Failed to process ./weekly_csvs\test_invalid.csv: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+2025-10-12 07:11:59,140 - INFO - Successfully processed: ./weekly_csvs\week_01_20250817.csv
+2025-10-12 07:11:59,140 - INFO - Successfully processed: ./weekly_csvs\week_02_20250824.csv
+2025-10-12 07:11:59,140 - INFO - Successfully processed: ./weekly_csvs\week_03_20250831.csv
+2025-10-12 07:11:59,140 - INFO - Successfully processed: ./weekly_csvs\week_04_20250907.csv
+2025-10-12 07:11:59,140 - INFO - Successfully processed: ./weekly_csvs\week_05_20250914.csv
+2025-10-12 07:11:59,140 - INFO - Successfully processed: ./weekly_csvs\week_06_20250921.csv
+2025-10-12 07:11:59,140 - INFO - Successfully processed: ./weekly_csvs\week_07_20250928.csv
+2025-10-12 07:11:59,140 - INFO - Successfully processed: ./weekly_csvs\week_08_20251005.csv
+2025-10-12 07:11:59,151 - INFO - Combined data from 8 files: 8 rows
+2025-10-12 07:11:59,157 - INFO - Trend analysis: {'CSAT': {'recent_avg': 8.48, 'overall_avg': 8.68, 'trend': 'declining'}, 'Resolution': {'recent_total': 38, 'trend': 'improving'}}
+2025-10-12 07:11:59,171 - INFO - Backup created: ../Hybrid_ProjectPlan_Template_backup_20251012_071159.xlsx
+2025-10-12 07:11:59,187 - INFO - Successfully wrote 8 rows into Weekly_Updates @ ../Hybrid_ProjectPlan_Template.xlsx
+2025-10-12 07:11:59,187 - INFO - Weekly update completed successfully!  • Processed 8 data rows • Written 8 rows to Excel • Duration: 0.05 seconds • Trends detected: {'CSAT': {'recent_avg': 8.48, 'overall_avg': 8.68, 'trend': 'declining'}, 'Resolution': {'recent_total': 38, 'trend': 'improving'}} 
