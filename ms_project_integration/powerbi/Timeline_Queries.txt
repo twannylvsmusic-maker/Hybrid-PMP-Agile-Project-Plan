@@ -1,0 +1,301 @@
+// ============================================
+// POWER QUERY M-CODE FOR GANTT & TIMELINE
+// For Hybrid PMP + Agile Project Management System
+// ============================================
+
+// --------------------------------------------
+// QUERY 1: Load Gantt Chart Data from Excel
+// --------------------------------------------
+
+let
+    Source = Excel.Workbook(File.Contents("C:\YOUR_PATH\Gantt_Chart_Template.xlsx"), null, true),
+    GanttSheet = Source{[Item="Gantt Chart",Kind="Sheet"]}[Data],
+    PromotedHeaders = Table.PromoteHeaders(GanttSheet, [PromoteAllScalars=true]),
+    ChangedType = Table.TransformColumnTypes(PromotedHeaders,{
+        {"Task ID", Int64.Type}, 
+        {"Task Name", type text}, 
+        {"Duration (Days)", type number}, 
+        {"Start Date", type date}, 
+        {"Finish Date", type date}, 
+        {"Progress (%)", Int64.Type}, 
+        {"Status", type text}, 
+        {"Dependencies", type text}, 
+        {"Assigned To", type text}, 
+        {"Priority", type text}, 
+        {"Notes", type text},
+        {"Critical Path", type text}
+    }),
+    // Add calculated columns
+    AddedTaskDuration = Table.AddColumn(ChangedType, "Task Duration Days", each Duration.Days([Finish Date] - [Start Date])),
+    AddedIsMilestone = Table.AddColumn(AddedTaskDuration, "Is Milestone", each if [Duration (Days)] = 0 then "Yes" else "No"),
+    AddedIsOverdue = Table.AddColumn(AddedIsMilestone, "Is Overdue", each if [Finish Date] < Date.From(DateTime.LocalNow()) and [Status] <> "Completed" then "Yes" else "No"),
+    AddedDaysRemaining = Table.AddColumn(AddedIsOverdue, "Days Remaining", each Duration.Days([Finish Date] - Date.From(DateTime.LocalNow()))),
+    AddedIsActive = Table.AddColumn(AddedDaysRemaining, "Is Active", each 
+        if [Start Date] <= Date.From(DateTime.LocalNow()) and 
+           [Finish Date] >= Date.From(DateTime.LocalNow()) and 
+           [Status] <> "Completed" 
+        then "Yes" else "No"
+    )
+in
+    AddedIsActive
+
+
+// --------------------------------------------
+// QUERY 2: Timeline Date Table (for Gantt visual)
+// --------------------------------------------
+
+let
+    // Get min and max dates from Gantt Chart
+    GanttData = #"Gantt Chart",
+    MinDate = List.Min(GanttData[Start Date]),
+    MaxDate = List.Max(GanttData[Finish Date]),
+    
+    // Add buffer before and after
+    StartDate = Date.AddDays(MinDate, -7),
+    EndDate = Date.AddDays(MaxDate, 30),
+    
+    // Generate date list
+    DayCount = Duration.Days(EndDate - StartDate) + 1,
+    DateList = List.Dates(StartDate, DayCount, #duration(1, 0, 0, 0)),
+    
+    // Convert to table
+    #"Converted to Table" = Table.FromList(DateList, Splitter.SplitByNothing(), {"Date"}),
+    #"Changed Type" = Table.TransformColumnTypes(#"Converted to Table",{{"Date", type date}}),
+    
+    // Add date attributes
+    #"Added Year" = Table.AddColumn(#"Changed Type", "Year", each Date.Year([Date])),
+    #"Added Month" = Table.AddColumn(#"Added Year", "Month", each Date.Month([Date])),
+    #"Added Month Name" = Table.AddColumn(#"Added Month", "Month Name", each Date.MonthName([Date])),
+    #"Added Week" = Table.AddColumn(#"Added Month Name", "Week Number", each Date.WeekOfYear([Date])),
+    #"Added Day" = Table.AddColumn(#"Added Week", "Day", each Date.Day([Date])),
+    #"Added Day Name" = Table.AddColumn(#"Added Day", "Day Name", each Date.DayOfWeekName([Date])),
+    #"Added Day of Week" = Table.AddColumn(#"Added Day Name", "Day of Week", each Date.DayOfWeek([Date])),
+    
+    // Add working day indicator
+    #"Added Is Working Day" = Table.AddColumn(#"Added Day of Week", "Is Working Day", each 
+        if [Day of Week] >= 1 and [Day of Week] <= 5 then "Yes" else "No"
+    ),
+    
+    // Add weekend indicator
+    #"Added Is Weekend" = Table.AddColumn(#"Added Is Working Day", "Is Weekend", each 
+        if [Day of Week] = 0 or [Day of Week] = 6 then "Yes" else "No"
+    ),
+    
+    // Add today marker
+    #"Added Is Today" = Table.AddColumn(#"Added Is Weekend", "Is Today", each 
+        if [Date] = Date.From(DateTime.LocalNow()) then "Yes" else "No"
+    ),
+    
+    // Add quarter
+    #"Added Quarter" = Table.AddColumn(#"Added Is Today", "Quarter", each "Q" & Text.From(Date.QuarterOfYear([Date]))),
+    
+    // Add year-month
+    #"Added Year-Month" = Table.AddColumn(#"Added Quarter", "Year-Month", each Date.ToText([Date], "yyyy-MM"))
+in
+    #"Added Year-Month"
+
+
+// --------------------------------------------
+// QUERY 3: Task Status Summary
+// --------------------------------------------
+
+let
+    Source = #"Gantt Chart",
+    GroupedByStatus = Table.Group(Source, {"Status"}, {
+        {"Task Count", each Table.RowCount(_), Int64.Type},
+        {"Total Duration", each List.Sum([#"Duration (Days)"]), type number},
+        {"Avg Progress", each List.Average([#"Progress (%)"]), type number}
+    }),
+    AddedPercentage = Table.AddColumn(GroupedByStatus, "Percentage", each [Task Count] / List.Sum(GroupedByStatus[Task Count]))
+in
+    AddedPercentage
+
+
+// --------------------------------------------
+// QUERY 4: Resource Allocation Analysis
+// --------------------------------------------
+
+let
+    Source = #"Gantt Chart",
+    // Split resources if multiple are assigned to one task
+    SplitResources = Table.ExpandListColumn(
+        Table.TransformColumns(Source, {
+            {"Assigned To", Splitter.SplitTextByDelimiter(",", QuoteStyle.None), 
+            let itemType = (type nullable text) meta [Serialized.Text = true] 
+            in type {itemType}}
+        }), 
+        "Assigned To"
+    ),
+    TrimmedResources = Table.TransformColumns(SplitResources, {{"Assigned To", Text.Trim, type text}}),
+    FilteredNonEmpty = Table.SelectRows(TrimmedResources, each [Assigned To] <> null and [Assigned To] <> ""),
+    
+    // Group by resource
+    GroupedByResource = Table.Group(FilteredNonEmpty, {"Assigned To"}, {
+        {"Total Tasks", each Table.RowCount(_), Int64.Type},
+        {"Total Duration (Days)", each List.Sum([#"Duration (Days)"]), type number},
+        {"In Progress Tasks", each List.Count(List.Select([Status], each _ = "In Progress")), Int64.Type},
+        {"Completed Tasks", each List.Count(List.Select([Status], each _ = "Completed")), Int64.Type},
+        {"Avg Progress", each List.Average([#"Progress (%)"]), type number},
+        {"High Priority Tasks", each List.Count(List.Select([Priority], each _ = "High")), Int64.Type}
+    }),
+    
+    // Add utilization category
+    AddedUtilization = Table.AddColumn(GroupedByResource, "Utilization Level", each 
+        if [#"Total Duration (Days)"] > 60 then "Overallocated"
+        else if [#"Total Duration (Days)"] > 40 then "Fully Allocated"
+        else if [#"Total Duration (Days)"] > 20 then "Moderately Allocated"
+        else "Under Allocated"
+    ),
+    
+    // Add completion rate
+    AddedCompletionRate = Table.AddColumn(AddedUtilization, "Completion Rate", each 
+        [Completed Tasks] / [Total Tasks]
+    )
+in
+    AddedCompletionRate
+
+
+// --------------------------------------------
+// QUERY 5: Critical Path Tasks
+// --------------------------------------------
+
+let
+    Source = #"Gantt Chart",
+    FilteredCritical = Table.SelectRows(Source, each ([Critical Path] = "Yes")),
+    SortedByStart = Table.Sort(FilteredCritical,{{"Start Date", Order.Ascending}}),
+    AddedSequence = Table.AddIndexColumn(SortedByStart, "Critical Path Sequence", 1, 1, Int64.Type)
+in
+    AddedSequence
+
+
+// --------------------------------------------
+// QUERY 6: Milestone Tracker
+// --------------------------------------------
+
+let
+    Source = #"Gantt Chart",
+    FilteredMilestones = Table.SelectRows(Source, each ([Duration (Days)] = 0)),
+    AddedStatus = Table.AddColumn(FilteredMilestones, "Milestone Status", each 
+        if [Status] = "Completed" then "Completed"
+        else if [Finish Date] < Date.From(DateTime.LocalNow()) then "Overdue"
+        else if [Finish Date] < Date.AddDays(Date.From(DateTime.LocalNow()), 7) then "Due This Week"
+        else "Upcoming"
+    ),
+    SortedByDate = Table.Sort(AddedStatus,{{"Finish Date", Order.Ascending}})
+in
+    SortedByDate
+
+
+// --------------------------------------------
+// QUERY 7: Weekly Timeline Snapshot
+// --------------------------------------------
+
+let
+    Source = #"Gantt Chart",
+    AddedWeekStart = Table.AddColumn(Source, "Week Start", each Date.StartOfWeek([Start Date], Day.Monday)),
+    AddedWeekEnd = Table.AddColumn(AddedWeekStart, "Week End", each Date.EndOfWeek([Start Date], Day.Monday)),
+    
+    // Group by week
+    GroupedByWeek = Table.Group(AddedWeekEnd, {"Week Start", "Week End"}, {
+        {"Tasks Starting", each Table.RowCount(_), Int64.Type},
+        {"Total Duration", each List.Sum([#"Duration (Days)"]), type number},
+        {"High Priority Count", each List.Count(List.Select([Priority], each _ = "High")), Int64.Type}
+    }),
+    
+    SortedByWeek = Table.Sort(GroupedByWeek,{{"Week Start", Order.Ascending}})
+in
+    SortedByWeek
+
+
+// --------------------------------------------
+// QUERY 8: Dependency Chain Analysis
+// --------------------------------------------
+
+let
+    Source = #"Gantt Chart",
+    FilteredWithDependencies = Table.SelectRows(Source, each [Dependencies] <> null and [Dependencies] <> ""),
+    
+    // Extract dependency count
+    AddedDepCount = Table.AddColumn(FilteredWithDependencies, "Dependency Count", each 
+        List.Count(Text.Split([Dependencies], ","))
+    ),
+    
+    // Add dependency type (simplified - checks for common patterns)
+    AddedDepType = Table.AddColumn(AddedDepCount, "Dependency Type", each 
+        if Text.Contains([Dependencies], "FS") then "Finish-to-Start"
+        else if Text.Contains([Dependencies], "SS") then "Start-to-Start"
+        else if Text.Contains([Dependencies], "FF") then "Finish-to-Finish"
+        else "Unspecified"
+    )
+in
+    AddedDepType
+
+
+// --------------------------------------------
+// QUERY 9: Priority Distribution
+// --------------------------------------------
+
+let
+    Source = #"Gantt Chart",
+    GroupedByPriority = Table.Group(Source, {"Priority"}, {
+        {"Task Count", each Table.RowCount(_), Int64.Type},
+        {"Completed", each List.Count(List.Select([Status], each _ = "Completed")), Int64.Type},
+        {"In Progress", each List.Count(List.Select([Status], each _ = "In Progress")), Int64.Type},
+        {"Not Started", each List.Count(List.Select([Status], each _ = "Not Started")), Int64.Type},
+        {"Blocked", each List.Count(List.Select([Status], each _ = "Blocked")), Int64.Type},
+        {"Avg Progress", each List.Average([#"Progress (%)"]), type number}
+    }),
+    
+    // Add priority order for sorting
+    AddedPriorityOrder = Table.AddColumn(GroupedByPriority, "Priority Order", each 
+        if [Priority] = "High" then 1
+        else if [Priority] = "Medium" then 2
+        else 3
+    ),
+    
+    SortedByPriority = Table.Sort(AddedPriorityOrder,{{"Priority Order", Order.Ascending}})
+in
+    SortedByPriority
+
+
+// --------------------------------------------
+// QUERY 10: Overdue Tasks Analysis
+// --------------------------------------------
+
+let
+    Source = #"Gantt Chart",
+    FilteredOverdue = Table.SelectRows(Source, each 
+        [Finish Date] < Date.From(DateTime.LocalNow()) and 
+        [Status] <> "Completed"
+    ),
+    
+    // Calculate days overdue
+    AddedDaysOverdue = Table.AddColumn(FilteredOverdue, "Days Overdue", each 
+        Duration.Days(Date.From(DateTime.LocalNow()) - [Finish Date])
+    ),
+    
+    // Add severity
+    AddedSeverity = Table.AddColumn(AddedDaysOverdue, "Severity", each 
+        if [Days Overdue] > 14 then "Critical"
+        else if [Days Overdue] > 7 then "High"
+        else "Medium"
+    ),
+    
+    SortedByDaysOverdue = Table.Sort(AddedSeverity,{{"Days Overdue", Order.Descending}})
+in
+    SortedByDaysOverdue
+
+
+// ============================================
+// NOTES FOR IMPLEMENTATION:
+// ============================================
+// 1. Replace "C:\YOUR_PATH\" with actual file path
+// 2. Ensure Gantt Chart sheet name matches template
+// 3. Refresh data source after making changes
+// 4. Set up automatic refresh schedule in Power BI Service
+// 5. Use these queries as data sources for visuals
+
+// ============================================
+// END OF POWER QUERY M-CODE
+// ============================================
+

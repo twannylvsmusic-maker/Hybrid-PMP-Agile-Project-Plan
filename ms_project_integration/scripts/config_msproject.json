@@ -1,0 +1,61 @@
+{
+  "paths": {
+    "excel_template": "../templates/Gantt_Chart_Template.xlsx",
+    "default_import_path": "./imports/",
+    "default_export_path": "./exports/",
+    "temp_directory": "./temp/"
+  },
+  "gantt_settings": {
+    "start_column": "H",
+    "timeline_weeks": 26,
+    "timeline_mode": "weeks",
+    "weekend_shading": true,
+    "today_marker": true,
+    "show_dependencies": true,
+    "critical_path_highlight": true
+  },
+  "dependency_types": {
+    "FS": "Finish-to-Start",
+    "SS": "Start-to-Start",
+    "FF": "Finish-to-Finish",
+    "SF": "Start-to-Finish"
+  },
+  "status_colors": {
+    "Not Started": "#9CA3AF",
+    "In Progress": "#F59E0B",
+    "Completed": "#10B981",
+    "Blocked": "#EF4444",
+    "On Hold": "#8B5CF6"
+  },
+  "priority_levels": {
+    "High": 1,
+    "Medium": 2,
+    "Low": 3
+  },
+  "working_days": {
+    "monday": true,
+    "tuesday": true,
+    "wednesday": true,
+    "thursday": true,
+    "friday": true,
+    "saturday": false,
+    "sunday": false
+  },
+  "ms_project_xml": {
+    "version": "2010",
+    "currency_symbol": "$",
+    "default_task_type": "FixedDuration",
+    "effort_driven": false
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "./logs/ms_project_integration.log",
+    "console": true
+  },
+  "notifications": {
+    "critical_path_changes": true,
+    "milestone_alerts": true,
+    "overallocation_warnings": true
+  }
+}
+

@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project xmlns="http://schemas.microsoft.com/project">
+  <Name>AI Chess Tutor Development Project</Name>
+  <Title>AI Chess Tutor - Sample Project</Title>
+  <CreationDate>2024-10-17T00:00:00</CreationDate>
+  <LastSaved>2024-10-17T12:00:00</LastSaved>
+  <ScheduleFromStart>1</ScheduleFromStart>
+  <StartDate>2024-10-21T08:00:00</StartDate>
+  <FinishDate>2025-02-28T17:00:00</FinishDate>
+  <CurrencySymbol>$</CurrencySymbol>
+  <DefaultTaskType>1</DefaultTaskType>
+  
+  <Tasks>
+    <!-- Task 1: Project Kickoff -->
+    <Task>
+      <UID>1</UID>
+      <ID>1</ID>
+      <Name>Project Kickoff</Name>
+      <Type>0</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2024-10-21T08:00:00</Start>
+      <Finish>2024-10-21T08:00:00</Finish>
+      <Duration>PT0H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT0H0M0S</Work>
+      <PercentComplete>100</PercentComplete>
+      <PercentWorkComplete>100</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>1</Milestone>
+      <Critical>1</Critical>
+      <Notes>Initial project kickoff meeting with all stakeholders</Notes>
+    </Task>
+    
+    <!-- Task 2: Requirements Analysis -->
+    <Task>
+      <UID>2</UID>
+      <ID>2</ID>
+      <Name>Requirements Analysis</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2024-10-21T08:00:00</Start>
+      <Finish>2024-10-27T17:00:00</Finish>
+      <Duration>PT40H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT40H0M0S</Work>
+      <PercentComplete>100</PercentComplete>
+      <PercentWorkComplete>100</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>0</Milestone>
+      <Critical>1</Critical>
+      <Notes>Gather and document all project requirements for AI Chess Tutor</Notes>
+      <PredecessorLink>
+        <PredecessorUID>1</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 3: System Architecture Design -->
+    <Task>
+      <UID>3</UID>
+      <ID>3</ID>
+      <Name>System Architecture Design</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2024-10-28T08:00:00</Start>
+      <Finish>2024-11-08T17:00:00</Finish>
+      <Duration>PT80H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT80H0M0S</Work>
+      <PercentComplete>75</PercentComplete>
+      <PercentWorkComplete>75</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>0</Milestone>
+      <Critical>1</Critical>
+      <Notes>Design overall system architecture including AI engine, UI, and database</Notes>
+      <PredecessorLink>
+        <PredecessorUID>2</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 4: Database Design -->
+    <Task>
+      <UID>4</UID>
+      <ID>4</ID>
+      <Name>Database Design</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2024-11-11T08:00:00</Start>
+      <Finish>2024-11-18T17:00:00</Finish>
+      <Duration>PT40H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT40H0M0S</Work>
+      <PercentComplete>50</PercentComplete>
+      <PercentWorkComplete>50</PercentWorkComplete>
+      <Priority>500</Priority>
+      <Milestone>0</Milestone>
+      <Critical>0</Critical>
+      <Notes>Design database schema for user data, game history, and AI training data</Notes>
+      <PredecessorLink>
+        <PredecessorUID>3</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 5: AI Chess Engine Development -->
+    <Task>
+      <UID>5</UID>
+      <ID>5</ID>
+      <Name>AI Chess Engine Development</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2024-11-11T08:00:00</Start>
+      <Finish>2024-12-13T17:00:00</Finish>
+      <Duration>PT200H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT200H0M0S</Work>
+      <PercentComplete>30</PercentComplete>
+      <PercentWorkComplete>30</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>0</Milestone>
+      <Critical>1</Critical>
+      <Notes>Develop core AI chess engine with move validation and strategy logic</Notes>
+      <PredecessorLink>
+        <PredecessorUID>3</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 6: UI/UX Design -->
+    <Task>
+      <UID>6</UID>
+      <ID>6</ID>
+      <Name>UI/UX Design</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2024-11-19T08:00:00</Start>
+      <Finish>2024-12-03T17:00:00</Finish>
+      <Duration>PT80H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT80H0M0S</Work>
+      <PercentComplete>0</PercentComplete>
+      <PercentWorkComplete>0</PercentWorkComplete>
+      <Priority>500</Priority>
+      <Milestone>0</Milestone>
+      <Critical>0</Critical>
+      <Notes>Design user interface and user experience for chess board and tutorials</Notes>
+      <PredecessorLink>
+        <PredecessorUID>4</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 7: Frontend Development -->
+    <Task>
+      <UID>7</UID>
+      <ID>7</ID>
+      <Name>Frontend Development</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2024-12-04T08:00:00</Start>
+      <Finish>2024-12-20T17:00:00</Finish>
+      <Duration>PT120H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT120H0M0S</Work>
+      <PercentComplete>0</PercentComplete>
+      <PercentWorkComplete>0</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>0</Milestone>
+      <Critical>1</Critical>
+      <Notes>Implement frontend using React and interactive chess board component</Notes>
+      <PredecessorLink>
+        <PredecessorUID>6</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 8: Backend API Development -->
+    <Task>
+      <UID>8</UID>
+      <ID>8</ID>
+      <Name>Backend API Development</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2024-12-04T08:00:00</Start>
+      <Finish>2024-12-20T17:00:00</Finish>
+      <Duration>PT120H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT120H0M0S</Work>
+      <PercentComplete>0</PercentComplete>
+      <PercentWorkComplete>0</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>0</Milestone>
+      <Critical>1</Critical>
+      <Notes>Develop REST API for game management and AI interaction</Notes>
+      <PredecessorLink>
+        <PredecessorUID>4</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 9: Integration Testing -->
+    <Task>
+      <UID>9</UID>
+      <ID>9</ID>
+      <Name>Integration Testing</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2025-01-06T08:00:00</Start>
+      <Finish>2025-01-20T17:00:00</Finish>
+      <Duration>PT80H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT80H0M0S</Work>
+      <PercentComplete>0</PercentComplete>
+      <PercentWorkComplete>0</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>0</Milestone>
+      <Critical>1</Critical>
+      <Notes>Test integration between AI engine, frontend, and backend</Notes>
+      <PredecessorLink>
+        <PredecessorUID>5</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+      <PredecessorLink>
+        <PredecessorUID>7</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+      <PredecessorLink>
+        <PredecessorUID>8</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 10: User Acceptance Testing -->
+    <Task>
+      <UID>10</UID>
+      <ID>10</ID>
+      <Name>User Acceptance Testing</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2025-01-21T08:00:00</Start>
+      <Finish>2025-02-03T17:00:00</Finish>
+      <Duration>PT80H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT80H0M0S</Work>
+      <PercentComplete>0</PercentComplete>
+      <PercentWorkComplete>0</PercentWorkComplete>
+      <Priority>500</Priority>
+      <Milestone>0</Milestone>
+      <Critical>0</Critical>
+      <Notes>Conduct UAT with beta users and gather feedback</Notes>
+      <PredecessorLink>
+        <PredecessorUID>9</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 11: Bug Fixes and Refinements -->
+    <Task>
+      <UID>11</UID>
+      <ID>11</ID>
+      <Name>Bug Fixes and Refinements</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2025-02-04T08:00:00</Start>
+      <Finish>2025-02-18T17:00:00</Finish>
+      <Duration>PT80H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT80H0M0S</Work>
+      <PercentComplete>0</PercentComplete>
+      <PercentWorkComplete>0</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>0</Milestone>
+      <Critical>1</Critical>
+      <Notes>Fix bugs identified during testing and refine features</Notes>
+      <PredecessorLink>
+        <PredecessorUID>10</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 12: Production Deployment -->
+    <Task>
+      <UID>12</UID>
+      <ID>12</ID>
+      <Name>Production Deployment</Name>
+      <Type>1</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2025-02-19T08:00:00</Start>
+      <Finish>2025-02-21T17:00:00</Finish>
+      <Duration>PT24H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT24H0M0S</Work>
+      <PercentComplete>0</PercentComplete>
+      <PercentWorkComplete>0</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>0</Milestone>
+      <Critical>1</Critical>
+      <Notes>Deploy application to production environment</Notes>
+      <PredecessorLink>
+        <PredecessorUID>11</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>0</LinkLag>
+      </PredecessorLink>
+    </Task>
+    
+    <!-- Task 13: Project Launch -->
+    <Task>
+      <UID>13</UID>
+      <ID>13</ID>
+      <Name>Project Launch</Name>
+      <Type>0</Type>
+      <IsNull>0</IsNull>
+      <CreateDate>2024-10-17T00:00:00</CreateDate>
+      <Start>2025-02-28T08:00:00</Start>
+      <Finish>2025-02-28T08:00:00</Finish>
+      <Duration>PT0H0M0S</Duration>
+      <DurationFormat>7</DurationFormat>
+      <Work>PT0H0M0S</Work>
+      <PercentComplete>0</PercentComplete>
+      <PercentWorkComplete>0</PercentWorkComplete>
+      <Priority>800</Priority>
+      <Milestone>1</Milestone>
+      <Critical>1</Critical>
+      <Notes>Official launch of AI Chess Tutor to public</Notes>
+      <PredecessorLink>
+        <PredecessorUID>12</PredecessorUID>
+        <Type>1</Type>
+        <LinkLag>48</LinkLag>
+      </PredecessorLink>
+    </Task>
+  </Tasks>
+</Project>
+

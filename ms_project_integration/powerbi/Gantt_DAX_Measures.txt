@@ -1,0 +1,418 @@
+// ============================================
+// GANTT CHART & TIMELINE DAX MEASURES
+// For Hybrid PMP + Agile Project Management System
+// ============================================
+
+// --------------------------------------------
+// 1. TIMELINE & DATE CALCULATIONS
+// --------------------------------------------
+
+// Project Start Date
+Project Start Date = 
+MIN('Gantt Chart'[Start Date])
+
+// Project End Date
+Project End Date = 
+MAX('Gantt Chart'[Finish Date])
+
+// Project Duration (Days)
+Project Duration Days = 
+DATEDIFF([Project Start Date], [Project End Date], DAY)
+
+// Project Duration (Weeks)
+Project Duration Weeks = 
+DIVIDE([Project Duration Days], 7, 0)
+
+// Days Until Project Completion
+Days Until Completion = 
+DATEDIFF(TODAY(), [Project End Date], DAY)
+
+// Is Project Overdue
+Is Project Overdue = 
+IF([Days Until Completion] < 0, "Yes", "No")
+
+// --------------------------------------------
+// 2. TASK METRICS
+// --------------------------------------------
+
+// Total Tasks
+Total Tasks = 
+COUNTROWS('Gantt Chart')
+
+// Completed Tasks
+Completed Tasks = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Status] = "Completed"
+)
+
+// In Progress Tasks
+In Progress Tasks = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Status] = "In Progress"
+)
+
+// Not Started Tasks
+Not Started Tasks = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Status] = "Not Started"
+)
+
+// Blocked Tasks
+Blocked Tasks = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Status] = "Blocked"
+)
+
+// Overdue Tasks
+Overdue Tasks = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Finish Date] < TODAY(),
+    'Gantt Chart'[Status] <> "Completed"
+)
+
+// Tasks Due This Week
+Tasks Due This Week = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Finish Date] >= TODAY(),
+    'Gantt Chart'[Finish Date] < TODAY() + 7,
+    'Gantt Chart'[Status] <> "Completed"
+)
+
+// --------------------------------------------
+// 3. PROGRESS METRICS
+// --------------------------------------------
+
+// Overall Project Progress
+Overall Project Progress = 
+DIVIDE(
+    SUM('Gantt Chart'[Progress]) * SUM('Gantt Chart'[Duration (Days)]),
+    SUM('Gantt Chart'[Duration (Days)]),
+    0
+)
+
+// Weighted Progress (by Duration)
+Weighted Progress = 
+DIVIDE(
+    SUMX(
+        'Gantt Chart',
+        'Gantt Chart'[Progress] * 'Gantt Chart'[Duration (Days)]
+    ),
+    SUM('Gantt Chart'[Duration (Days)]) * 100,
+    0
+)
+
+// Tasks Completion Rate
+Tasks Completion Rate = 
+DIVIDE([Completed Tasks], [Total Tasks], 0)
+
+// Average Task Progress
+Average Task Progress = 
+AVERAGE('Gantt Chart'[Progress])
+
+// --------------------------------------------
+// 4. CRITICAL PATH ANALYSIS
+// --------------------------------------------
+
+// Critical Tasks Count
+Critical Tasks Count = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Critical Path] = "Yes"
+)
+
+// Critical Path Progress
+Critical Path Progress = 
+CALCULATE(
+    AVERAGE('Gantt Chart'[Progress]),
+    'Gantt Chart'[Critical Path] = "Yes"
+)
+
+// Critical Tasks At Risk
+Critical Tasks At Risk = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Critical Path] = "Yes",
+    'Gantt Chart'[Progress] < 50,
+    'Gantt Chart'[Finish Date] < TODAY() + 7
+)
+
+// Critical Path Status
+Critical Path Status = 
+SWITCH(
+    TRUE(),
+    [Critical Tasks At Risk] > 2, "High Risk",
+    [Critical Tasks At Risk] > 0, "Medium Risk",
+    "On Track"
+)
+
+// --------------------------------------------
+// 5. RESOURCE ALLOCATION
+// --------------------------------------------
+
+// Total Resources
+Total Resources = 
+DISTINCTCOUNT('Gantt Chart'[Assigned To])
+
+// Tasks Per Resource
+Tasks Per Resource = 
+DIVIDE([Total Tasks], [Total Resources], 0)
+
+// Resource Workload (Days)
+Resource Workload Days = 
+SUMX(
+    VALUES('Gantt Chart'[Assigned To]),
+    CALCULATE(SUM('Gantt Chart'[Duration (Days)]))
+)
+
+// Average Resource Utilization
+Average Resource Utilization = 
+DIVIDE([Resource Workload Days], [Total Resources], 0)
+
+// Overallocated Resources
+Overallocated Resources = 
+CALCULATE(
+    DISTINCTCOUNT('Gantt Chart'[Assigned To]),
+    FILTER(
+        VALUES('Gantt Chart'[Assigned To]),
+        CALCULATE(SUM('Gantt Chart'[Duration (Days)])) > 40  // More than 40 days of work
+    )
+)
+
+// --------------------------------------------
+// 6. MILESTONE TRACKING
+// --------------------------------------------
+
+// Total Milestones
+Total Milestones = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Duration (Days)] = 0  // Milestones have 0 duration
+)
+
+// Completed Milestones
+Completed Milestones = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Duration (Days)] = 0,
+    'Gantt Chart'[Status] = "Completed"
+)
+
+// Upcoming Milestones
+Upcoming Milestones = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Duration (Days)] = 0,
+    'Gantt Chart'[Finish Date] >= TODAY(),
+    'Gantt Chart'[Finish Date] < TODAY() + 30,
+    'Gantt Chart'[Status] <> "Completed"
+)
+
+// Milestone Completion Rate
+Milestone Completion Rate = 
+DIVIDE([Completed Milestones], [Total Milestones], 0)
+
+// Next Milestone
+Next Milestone = 
+CALCULATE(
+    MIN('Gantt Chart'[Task Name]),
+    'Gantt Chart'[Duration (Days)] = 0,
+    'Gantt Chart'[Finish Date] >= TODAY(),
+    'Gantt Chart'[Status] <> "Completed",
+    TOPN(1, 'Gantt Chart', 'Gantt Chart'[Finish Date], ASC)
+)
+
+// Next Milestone Date
+Next Milestone Date = 
+CALCULATE(
+    MIN('Gantt Chart'[Finish Date]),
+    'Gantt Chart'[Duration (Days)] = 0,
+    'Gantt Chart'[Finish Date] >= TODAY(),
+    'Gantt Chart'[Status] <> "Completed"
+)
+
+// --------------------------------------------
+// 7. DEPENDENCY ANALYSIS
+// --------------------------------------------
+
+// Tasks With Dependencies
+Tasks With Dependencies = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    NOT(ISBLANK('Gantt Chart'[Dependencies]))
+)
+
+// Dependency Completion Rate
+Dependency Completion Rate = 
+DIVIDE(
+    CALCULATE(
+        COUNTROWS('Gantt Chart'),
+        NOT(ISBLANK('Gantt Chart'[Dependencies])),
+        'Gantt Chart'[Status] = "Completed"
+    ),
+    [Tasks With Dependencies],
+    0
+)
+
+// --------------------------------------------
+// 8. PRIORITY ANALYSIS
+// --------------------------------------------
+
+// High Priority Tasks
+High Priority Tasks = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Priority] = "High"
+)
+
+// High Priority Overdue
+High Priority Overdue = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Priority] = "High",
+    'Gantt Chart'[Finish Date] < TODAY(),
+    'Gantt Chart'[Status] <> "Completed"
+)
+
+// High Priority Progress
+High Priority Progress = 
+CALCULATE(
+    AVERAGE('Gantt Chart'[Progress]),
+    'Gantt Chart'[Priority] = "High"
+)
+
+// --------------------------------------------
+// 9. TIME INTELLIGENCE FOR GANTT
+// --------------------------------------------
+
+// Tasks Starting This Month
+Tasks Starting This Month = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    MONTH('Gantt Chart'[Start Date]) = MONTH(TODAY()),
+    YEAR('Gantt Chart'[Start Date]) = YEAR(TODAY())
+)
+
+// Tasks Ending This Month
+Tasks Ending This Month = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    MONTH('Gantt Chart'[Finish Date]) = MONTH(TODAY()),
+    YEAR('Gantt Chart'[Finish Date]) = YEAR(TODAY())
+)
+
+// Active Tasks Today
+Active Tasks Today = 
+CALCULATE(
+    COUNTROWS('Gantt Chart'),
+    'Gantt Chart'[Start Date] <= TODAY(),
+    'Gantt Chart'[Finish Date] >= TODAY(),
+    'Gantt Chart'[Status] <> "Completed"
+)
+
+// --------------------------------------------
+// 10. GANTT VISUALIZATION HELPERS
+// --------------------------------------------
+
+// Task Bar Color
+Task Bar Color = 
+SWITCH(
+    TRUE(),
+    'Gantt Chart'[Status] = "Completed", "#10B981",      // Green
+    'Gantt Chart'[Status] = "In Progress", "#F59E0B",    // Orange
+    'Gantt Chart'[Status] = "Blocked", "#EF4444",        // Red
+    'Gantt Chart'[Status] = "On Hold", "#8B5CF6",        // Purple
+    "#9CA3AF"                                             // Gray (Not Started)
+)
+
+// Task Duration for Visual
+Task Duration Visual = 
+DATEDIFF('Gantt Chart'[Start Date], 'Gantt Chart'[Finish Date], DAY)
+
+// Task Position (for Gantt bar placement)
+Task Position = 
+DATEDIFF([Project Start Date], 'Gantt Chart'[Start Date], DAY)
+
+// Is Task Late
+Is Task Late = 
+IF(
+    AND(
+        'Gantt Chart'[Finish Date] < TODAY(),
+        'Gantt Chart'[Status] <> "Completed"
+    ),
+    "Late",
+    "On Time"
+)
+
+// Days Late
+Days Late = 
+IF(
+    [Is Task Late] = "Late",
+    DATEDIFF('Gantt Chart'[Finish Date], TODAY(), DAY),
+    0
+)
+
+// --------------------------------------------
+// 11. SCHEDULE PERFORMANCE INDEX (SPI)
+// --------------------------------------------
+
+// Planned Value (PV)
+Planned Value = 
+CALCULATE(
+    SUM('Gantt Chart'[Duration (Days)]),
+    'Gantt Chart'[Finish Date] <= TODAY()
+)
+
+// Earned Value (EV)
+Earned Value = 
+SUMX(
+    'Gantt Chart',
+    'Gantt Chart'[Duration (Days)] * ('Gantt Chart'[Progress] / 100)
+)
+
+// Schedule Performance Index
+Schedule Performance Index (SPI) = 
+DIVIDE([Earned Value], [Planned Value], 0)
+
+// Schedule Variance
+Schedule Variance = 
+[Earned Value] - [Planned Value]
+
+// SPI Status
+SPI Status = 
+SWITCH(
+    TRUE(),
+    [Schedule Performance Index (SPI)] >= 1, "Ahead of Schedule",
+    [Schedule Performance Index (SPI)] >= 0.9, "On Schedule",
+    [Schedule Performance Index (SPI)] >= 0.8, "Slightly Behind",
+    "Behind Schedule"
+)
+
+// --------------------------------------------
+// 12. FORECAST METRICS
+// --------------------------------------------
+
+// Estimated Completion Date
+Estimated Completion Date = 
+VAR ProgressRate = DIVIDE([Overall Project Progress], DATEDIFF([Project Start Date], TODAY(), DAY), 0)
+VAR RemainingDays = DIVIDE(100 - [Overall Project Progress], ProgressRate, 0)
+RETURN
+TODAY() + RemainingDays
+
+// Days Variance from Plan
+Days Variance from Plan = 
+DATEDIFF([Project End Date], [Estimated Completion Date], DAY)
+
+// Completion Forecast Status
+Completion Forecast Status = 
+IF([Days Variance from Plan] > 0, "Early", IF([Days Variance from Plan] < 0, "Late", "On Time"))
+
+// ============================================
+// END OF GANTT CHART DAX MEASURES
+// ============================================
+
